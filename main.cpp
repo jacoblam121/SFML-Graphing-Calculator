@@ -1,13 +1,10 @@
 #include <iostream>
-#include <iomanip>
-
-
+#include "includes/animate.h"
 using namespace std;
 
-int main(int argv, char** argc) {
-    cout << "\n\n"
-         << endl;
-
-    cout << "\n\n\n=====================" << endl;
+int main()
+{
+    animate graph;
+    graph.run();
     return 0;
 }
