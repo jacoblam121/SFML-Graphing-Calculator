@@ -8,7 +8,8 @@
 #include "../includes/graph/graph_info.h"
 #include "../includes/graph/graph.h"
 #include "system.h"
-#include "constants.h"
+#include "polar.h"
+#include "../includes/graph/plot.h"
 
 using namespace std;
 
@@ -18,6 +19,7 @@ public:
     // default ctor
     Sidebar()
     {
+        polar = Polar();
     }
     // ctor that takes in graph info, load up font
     Sidebar(Graph_Info *info) : _info(info)
@@ -46,7 +48,7 @@ public:
     //function that draws the text for the history as well as sets up the boxes
     void inputhistory(sf::RenderWindow &window)
     {
-        int maxlines = 9;
+        int maxlines = 10;
         // draw history from history.txt under graph button
         ifstream history("history.txt");
         vector<string> linespacing;
@@ -79,7 +81,7 @@ public:
             for (int j = 0; j < 10; j++)
             {
                 sf::RectangleShape rect(sf::Vector2f(220, 30));
-                rect.setPosition(_info->windowsize.x - 230, 180 + j * 40);
+                rect.setPosition(_info->windowsize.x - 230, 300 + j * 40);
                 rect.setOutlineThickness(0);
                 rect.setOutlineColor(sf::Color::Black);
                 rect.setFillColor(sf::Color::Transparent);
@@ -114,49 +116,57 @@ public:
         controls.setFont(font);
         controls.setCharacterSize(22);
         controls.setFillColor(sf::Color::Black);
-        controls.setPosition(sf::Vector2f(_info->windowsize.x - 163, 560));
+        controls.setPosition(sf::Vector2f(_info->windowsize.x - 163, 720));
         controls.setString("Controls");
+        //mode text
+        mode.setFont(font);
+        mode.setCharacterSize(22);
+        mode.setFillColor(sf::Color::Black);
+        mode.setPosition(sf::Vector2f(_info->windowsize.x - 220, 140));
+        mode.setString("Mode:");
         //for legend
         c1.setFont(font);
         c1.setCharacterSize(16);
         c1.setFillColor(sf::Color::Black);
-        c1.setPosition(sf::Vector2f(_info->windowsize.x - 200, 600));
+        c1.setPosition(sf::Vector2f(_info->windowsize.x - 200, 760));
         c1.setString("Zoom in: Enter");
         //for legend
         c2.setFont(font);
         c2.setCharacterSize(16);
         c2.setFillColor(sf::Color::Black);
-        c2.setPosition(sf::Vector2f(_info->windowsize.x - 200, 630));
+        c2.setPosition(sf::Vector2f(_info->windowsize.x - 200, 790));
         c2.setString("Zoom out: Shift+Enter");
         //for legend
         c3.setFont(font);
         c3.setCharacterSize(16);
         c3.setFillColor(sf::Color::Black);
-        c3.setPosition(sf::Vector2f(_info->windowsize.x - 200, 660));
+        c3.setPosition(sf::Vector2f(_info->windowsize.x - 200, 820));
         c3.setString("Pan: Arrow keys");
         //for legend
         c4.setFont(font);
         c4.setCharacterSize(16);
         c4.setFillColor(sf::Color::Black);
-        c4.setPosition(sf::Vector2f(_info->windowsize.x - 200, 690));
+        c4.setPosition(sf::Vector2f(_info->windowsize.x - 200, 850));
         c4.setString("Graph/Clear: Tab");
         //for legend
         c5.setFont(font);
         c5.setCharacterSize(16);
         c5.setFillColor(sf::Color::Black);
-        c5.setPosition(sf::Vector2f(_info->windowsize.x - 200, 720));
+        c5.setPosition(sf::Vector2f(_info->windowsize.x - 200, 880));
         c5.setString("Clear History: Delete");
         //for legend
         c6.setFont(font);
         c6.setCharacterSize(16);
         c6.setFillColor(sf::Color::Black);
-        c6.setPosition(sf::Vector2f(_info->windowsize.x - 200, 750));
+        c6.setPosition(sf::Vector2f(_info->windowsize.x - 200, 910));
         c6.setString("Exit:Esc");
 
         //draw all the text
         window.draw(buttontext);
         window.draw(historytext);
         window.draw(controls);
+        // window.draw(mode);
+
         window.draw(c1);
         window.draw(c2);
         window.draw(c3);
@@ -179,20 +189,30 @@ public:
         graphbutton.setSize(sf::Vector2f(220, 50));
         graphbutton.setFillColor(sf::Color(255, 255, 90));
         graphbutton.setPosition(sf::Vector2f(_info->windowsize.x - 230, 70));
+        //cartesian button
+        moderect.setSize(sf::Vector2f(220, 50));
+        moderect.setFillColor(sf::Color(153, 255, 153));
+        moderect.setPosition(sf::Vector2f(_info->windowsize.x - 230, 130));
+        //polar button
+        polarbutton.setSize(sf::Vector2f(220, 50));
+        polarbutton.setFillColor(sf::Color(153, 255, 153));
+        polarbutton.setPosition(sf::Vector2f(_info->windowsize.x - 230, 190));
         //history box
-        historybox.setSize(sf::Vector2f(220, 410));
+        historybox.setSize(sf::Vector2f(220, 570));
         historybox.setFillColor(sf::Color(209, 213, 219));
         historybox.setPosition(sf::Vector2f(_info->windowsize.x - 230, 130));
         //menu box
         menu.setSize(sf::Vector2f(220, 240));
         menu.setFillColor(sf::Color(230, 204, 255));
-        menu.setPosition(sf::Vector2f(_info->windowsize.x - 230, 550));
+        menu.setPosition(sf::Vector2f(_info->windowsize.x - 230, 710));
         //draws shapes
         window.draw(rect);
         window.draw(inputbox);
         window.draw(graphbutton);
         window.draw(historybox);
         window.draw(menu);
+        // window.draw(moderect);
+        // window.draw(polarbutton);
         //draws history buttons from vector
         for (const auto &rect : historybuttons)
         {
@@ -200,26 +220,34 @@ public:
         }
     }
     //handles clicking on graph/clear button
-    void handleclick(sf::Event &event, sf::RenderWindow &window, System *system)
+    void handleclick(sf::Event &event, sf::RenderWindow &window, System *system, Polar &polar)
     {
 
         sf::Vector2i pos = mousepos(window);
         sf::FloatRect graphbuttonbounds = graphbutton.getGlobalBounds();
+        // sf::FloatRect moderectbounds = moderect.getGlobalBounds();
+        // sf::FloatRect polarbuttonbounds = polarbutton.getGlobalBounds();
 
         if (event.mouseButton.button == sf::Mouse::Left)
         {
             if (graphbuttonbounds.contains(static_cast<float>(pos.x), static_cast<float>(pos.y)))
             {
-                if (system == nullptr)
-                {
-                    throw runtime_error("system is null");
-                }
                 cout << "graph button clicked" << endl;
-
                 system->inputgraph();
             }
+            // else if (moderectbounds.contains(static_cast<float>(pos.x), static_cast<float>(pos.y)))
+            // {
+            //     cout << "cartesian button clicked" << endl;
+            //     polar.switchpolar(false);
+            // }
+            // else if (polarbuttonbounds.contains(static_cast<float>(pos.x), static_cast<float>(pos.y)))
+            // {
+            //     cout << "polar button clicked" << endl;
+            //     polar.switchpolar(true);
+            // }
         }
     }
+
     //gets mouse position
     sf::Vector2i mousepos(sf::RenderWindow &window)
     {
@@ -238,9 +266,14 @@ private:
     sf::RectangleShape graphbutton;
     sf::RectangleShape historybox;
     sf::RectangleShape menu;
+    sf::RectangleShape moderect;
+    sf::RectangleShape polarbutton;
+    sf::Text cartesiantext;
+    sf::Text polartext;
     sf::Text buttontext;
     sf::Text historytext;
     sf::Text controls;
+    sf::Text mode;
     sf::Text c1;
     sf::Text c2;
     sf::Text c3;
@@ -248,8 +281,8 @@ private:
     sf::Text c5;
     sf::Text c6;
     System *system;
-    bool buttonclicked = false;
     vector<sf::RectangleShape> historybuttons;
+    Polar polar;
 
     float _left;
     float _width;

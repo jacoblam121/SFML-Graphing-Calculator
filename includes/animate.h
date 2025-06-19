@@ -3,8 +3,11 @@
 #include <SFML/Graphics.hpp>
 #include "system.h"
 #include "sidebar.h"
+#include "polar.h"
 #include "../includes/graph/graph.h"
 #include "../includes/graph/graph_info.h"
+#include "../includes/graph/plot.h"
+#include "../includes/rpn/rpn.h"
 #include <vector>
 
 class animate
@@ -90,7 +93,7 @@ public:
                 break;
             //mouse button clicks, send to sidebar to handle (no mouse clicks in graph window)
             case sf::Event::MouseButtonReleased:
-                sidebar.handleclick(event, window, system);
+                sidebar.handleclick(event, window, system, polar);
                 break;
             default:
                 break;
@@ -112,6 +115,10 @@ public:
         sidebar.drawinputtext(window, inputtext);
         sidebar.inputhistory(window);
         sidebar.drawtext(window);
+        // rpn.drawtext(window);
+
+        // plot.drawtext(window);
+
     }
     //destructor
     ~animate()
@@ -125,9 +132,13 @@ private:
     System *system;             // container for all the animated objects
     Graph *graph;
     bool mouseIn;    // mouse is in the screen
+    bool ispolar = true;
     Sidebar sidebar; // rectangular message sidebar
     sf::Text inputtext;
     sf::Text coords;
+    Polar polar;
+    Plot plot;
+    RPN rpn;
 };
 
 #endif // GAME_H

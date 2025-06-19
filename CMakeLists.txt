@@ -79,15 +79,11 @@ ADD_EXECUTABLE(testB
 TARGET_LINK_LIBRARIES(basic_test gtest)
 TARGET_LINK_LIBRARIES(testB gtest)
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake_modules")
-find_package(SFML REQUIRED system window graphics network audio)
+find_package(SFML REQUIRED COMPONENTS system window graphics network audio)
 
-if (SFML_FOUND)
-include_directories(${SFML_INCLUDE_DIR})
-target_link_libraries(main ${SFML_LIBRARIES})
-target_link_libraries(basic_test ${SFML_LIBRARIES}) 
-target_link_libraries(testB ${SFML_LIBRARIES})
-endif()
+target_link_libraries(main sfml-system sfml-window sfml-graphics sfml-network sfml-audio)
+target_link_libraries(basic_test sfml-system sfml-window sfml-graphics sfml-network sfml-audio) 
+target_link_libraries(testB sfml-system sfml-window sfml-graphics sfml-network sfml-audio)
 
  
 

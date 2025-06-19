@@ -2,8 +2,8 @@
 #define shunting_yard_h
 
 #include "../../includes/token/token.h"
-#include "../../includes/queue/MyQueue.h"
-#include "../../includes/stack/MyStack.h"
+#include "../../includes/queue/Myqueue.h"
+#include "../../includes/stack/Mystack.h"
 #include "../../includes/shunting_yard/shunting_yard.h"
 #include "../../includes/node/node.h"
 #include "../../includes/linked_list_functions/linked_list_functions.h"

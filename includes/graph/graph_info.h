@@ -12,7 +12,7 @@ struct Graph_Info
     //main equation
     string equation;
     //windowsize +  graphpanel and sidebar
-    sf::Vector2f windowsize = sf::Vector2f(1200, 800);
+    sf::Vector2f windowsize = sf::Vector2f(1200, 960);
     float graphpanel = windowsize.x * 4 / 5;
     float sidebar = windowsize.x * 1 / 5;
     //defining graph attributes

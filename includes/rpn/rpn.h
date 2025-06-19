@@ -2,11 +2,13 @@
 #define rpn_h
 
 #include "../../includes/token/token.h"
-#include "../../includes/queue/MyQueue.h"
-#include "../../includes/stack/MyStack.h"
+#include "../../includes/queue/Myqueue.h"
+#include "../../includes/stack/Mystack.h"
 #include "../../includes/shunting_yard/shunting_yard.h"
 #include "../../includes/node/node.h"
 #include "../../includes/linked_list_functions/linked_list_functions.h"
+#include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
 
 #include <iostream>
 
@@ -86,15 +88,20 @@ public:
     private:
         node<T> *_ptr; // pointer being encapsulated
     };
-    //default ctor
+    enum Mode
+    {
+        CARTESIAN,
+        POLAR
+    };
+    // default ctor
     RPN()
     {
     }
-    //ctor that takes in postfix queue of tokens
+    // ctor that takes in postfix queue of tokens
     RPN(Queue<Token *> postfix) : _postfix(postfix), rpndouble(0)
     {
     }
-    //main rpn function that takes in a double and returns a double
+    // main rpn function that takes in a double and returns a double
     double rpn(double val)
     {
         // cout << "rpn func begin" << endl;
@@ -114,18 +121,40 @@ public:
                 stack.push(*it);
                 break;
             case 2:
+                
                 // if(stack.size() < 2)
                 // {
                 //     throw runtime_error("Error: less than 2 operands");
                 // }
-                //if variable push in a token with the double value being passed in
+                // if variable push in a token with the double value being passed in
                 if (static_cast<Operator *>(*it)->getprecval() == 3) // 3 for variable
                 {
-                    Token *func = new Token(Integer(val));
-                    stack.push(func);
-                    break;
+                    if ((*it)->token()[0] == 't')
+                    {
+                        // // cout << "found theta" << endl;
+                        // if (val >= 0)
+                        // {
+                        //     Token *func = new Token(Integer(val));
+                        //     stack.push(func);
+                        //     break;
+                        // }
+                        // else
+                        // {
+                            currentmode = Mode::POLAR;
+                            Token *func = new Token(Integer(val));
+                            stack.push(func);
+                            break;
+                        // }
+                    }
+                    else
+                    {
+                        currentmode = Mode::CARTESIAN;
+                        Token *func = new Token(Integer(val));
+                        stack.push(func);
+                        break;
+                    }
                 }
-                //if trig evaluate the trig function
+                // if trig evaluate the trig function
                 else if (static_cast<Operator *>(*it)->getprecval() == 4)
                 {
                     Token *arg = stack.pop();
@@ -133,7 +162,7 @@ public:
                     stack.push(op->trigeval(arg));
                     break;
                 }
-                //if log evaluate the function
+                // if log evaluate the function
                 else if (static_cast<Operator *>(*it)->getprecval() == 5)
                 {
                     Token *arg = stack.pop();
@@ -141,7 +170,7 @@ public:
                     stack.push(op->logsqrteval(arg));
                     break;
                 }
-                //if absval evaluate the function
+                // if absval evaluate the function
                 else if (static_cast<Operator *>(*it)->getprecval() == 6)
                 {
                     Token *arg = stack.pop();
@@ -149,7 +178,7 @@ public:
                     stack.push(op->abseval(arg));
                     break;
                 }
-                //else evaluate as normal
+                // else evaluate as normal
                 else
                 {
                     Token *arg2 = stack.pop();
@@ -158,6 +187,7 @@ public:
                     stack.push(op->eval(arg1, arg2));
                     break;
                 }
+                break;
             }
         }
 
@@ -166,26 +196,66 @@ public:
         // cout << "rpn func end" << endl;
         return rpndouble;
     }
-    //retuuens the double value of the rpn function
+    // retuuens the double value of the rpn function
     double operator()(double val)
     {
         return rpn(val);
     }
-    //sets the postfix queue of tokens
+    // sets the postfix queue of tokens
     Queue<Token *> set_input(Queue<Token *> input)
     {
         _postfix = input;
         return _postfix;
     }
-    //prints the double value of the rpn function
+    // prints the double value of the rpn function
     virtual void print()
     {
         cout << rpndouble << endl;
     }
+    void setmode(Mode mode)
+    {
+        currentmode = mode;
+    }
+    bool getpolar() const
+    {
+        return ispolar;
+    }
+    // void drawtext(sf::RenderWindow &window)
+    // {
+    //     font.loadFromFile("arial.ttf");
+
+    //     polartext.setFont(font);
+    //     polartext.setCharacterSize(22);
+    //     polartext.setFillColor(sf::Color::Black);
+    //     polartext.setPosition(1065, 140);
+    //     polartext.setString("Polar");
+
+    //     cartesiantext.setFont(font);
+    //     cartesiantext.setCharacterSize(22);
+    //     cartesiantext.setFillColor(sf::Color::Black);
+    //     cartesiantext.setPosition(1065, 140);
+    //     cartesiantext.setString("Cartesian");
+
+    //     // cout << "drawing" << endl;
+
+    //     if(Mode::POLAR == currentmode)
+    //     {
+    //         window.draw(polartext);
+    //     }
+    //     else
+    //     {
+    //         window.draw(cartesiantext);
+    //     }
+    // }
 
 private:
+    Mode currentmode = CARTESIAN;
+    bool ispolar = false;
     Queue<Token *> _postfix;
     double rpndouble;
+    sf::Font font;
+    sf::Text polartext;
+    sf::Text cartesiantext;
 };
 
 #endif

@@ -1,9 +1,10 @@
 #ifndef token_h
 #define token_h
 
-#include "../../includes/queue/MyQueue.h"
-#include "../../includes/stack/MyStack.h"
+#include "../../includes/queue/Myqueue.h"
+#include "../../includes/stack/Mystack.h"
 #include "../../includes/node/node.h"
+#include "../../includes/polar.h"
 
 #include <string>
 #include <iostream>
@@ -18,7 +19,7 @@ using namespace std;
 class Token
 {
 public:
-    //enum for token type
+    // enum for token type
     enum tokentype
     {
         UNKNOWN,    // 0
@@ -31,22 +32,26 @@ public:
     Token(const string &s = "?", int type = 0) : _token(s), _type(type)
     {
     }
-    //print function
+    virtual string getvalue()
+    {
+        return _token;
+    }
+    // print function
     virtual void print()
     {
         cout << _token << endl;
     }
-    //return type of token
+    // return type of token
     virtual int type()
     {
         return _type;
     }
-    //returns token as string
+    // returns token as string
     string token()
     {
         return _token;
     }
-    //evalulation functions
+    // evalulation functions
     virtual Token *eval(Token *left, Token *right)
     {
     }
@@ -65,12 +70,15 @@ public:
     virtual int getprecval()
     {
     }
-    //change type of token
+    virtual string getstring()
+    {
+    }
+    // change type of token
     void changetype(int i)
     {
         _type = i;
     }
-    //overload << operator
+    // overload << operator
     friend ostream &operator<<(ostream &outs, const Token &t)
     {
         outs << t._token << " ";
@@ -87,7 +95,7 @@ private:
     int _type;
     string _token;
 };
-//integer class
+// integer class
 class Integer : public Token
 {
 public:
@@ -107,7 +115,7 @@ public:
 private:
     double _value;
 };
-//operator class
+// operator class
 class Operator : public Token
 {
 public:
@@ -120,7 +128,7 @@ public:
         // or stod
         _prec = get_prec(op);
     }
-    //get precedence of operator
+    // get precedence of operator
     int get_prec(const string &op)
     {
         if (token() == "+")
@@ -145,6 +153,12 @@ public:
         }
         else if (token() == "x")
         {
+            ispolar = false;
+            return 3;
+        }
+        else if (token() == "theta")
+        {
+            ispolar = true;
             return 3;
         }
         else if (token() == "sin")
@@ -225,9 +239,11 @@ public:
         }
         return -1;
     }
-    //evaluation function for normal operators and numbers
+    // evaluation function for normal operators and numbers
     Token *eval(Token *left, Token *right)
     {
+        // cout << right->token() << endl;
+        // cout << "token eval func" << endl;
         double dleft = stod(left->token());
         double dright = stod(right->token());
         double ans;
@@ -247,22 +263,39 @@ public:
             ans = dleft / dright;
             break;
         case '^':
-            if (dleft == 0 || dright == 0)
-            {
-                break;
-            }
+            // if (dleft == 0 || dright == 0)
+            // {
+            //     break;
+            // }
             ans = pow(dleft, dright);
             break;
         }
-        if (dleft == 0 || dright == 0)
-        {
-            Token *tokenptr = new Integer(-10000);
-            return tokenptr;
-        }
-        Token *tokenptr = new Integer(ans);
-        return tokenptr;
+        // if (dleft == 0 || dright == 0)
+        // {
+        //     Token *tokenptr = new Integer(-10000);
+        //     return tokenptr;
+        // }
+        // if (ispolar)
+        // {
+            // if (ans <= 0)
+            // {
+            //     // cout << "ans <= 0" << endl;
+            //     Token *tokenptr = new Integer(0);
+            //     return tokenptr;
+            // }
+            // else
+            // {
+                Token *tokenptr = new Integer(ans);
+                return tokenptr;
+            // }
+        // }
+        // else
+        // {
+        //     Token *tokenptr = new Integer(ans);
+        //     return tokenptr;
+        // }
     }
-    //trig evaluation function
+    // trig evaluation function
     Token *trigeval(Token *arg)
     {
         double darg = stod(arg->token());
@@ -318,30 +351,46 @@ public:
         {
             ans = sinh(darg);
         }
-        else if(token() == "cosh")
+        else if (token() == "cosh")
         {
             ans = cosh(darg);
         }
-        else if(token() == "tanh")
+        else if (token() == "tanh")
         {
             ans = tanh(darg);
         }
-        else if(token() == "csch")
+        else if (token() == "csch")
         {
-            ans = 1/sinh(darg);
+            ans = 1 / sinh(darg);
         }
-        else if(token() == "sech")
+        else if (token() == "sech")
         {
-            ans = 1/cosh(darg);
+            ans = 1 / cosh(darg);
         }
-        else if(token() == "coth")
+        else if (token() == "coth")
         {
-            ans = 1/tanh(darg);
+            ans = 1 / tanh(darg);
         }
-        Token *tokenptr = new Integer(ans);
-        return tokenptr;
+        // if (ispolar)
+        // {
+        //     if (darg <= 0)
+        //     {
+        //         Token *tokenptr = new Integer(-10000);
+        //         return tokenptr;
+        //     }
+        //     else
+        //     {
+        //         Token *tokenptr = new Integer(ans);
+        //         return tokenptr;
+        //     }
+        // }
+        // else
+        // {
+            Token *tokenptr = new Integer(ans);
+            return tokenptr;
+        // }
     }
-    //log and sqrt evaluation function
+    // log and sqrt evaluation function
     Token *logsqrteval(Token *arg)
     {
         double darg = stod(arg->token());
@@ -364,10 +413,11 @@ public:
         {
             ans = sqrt(darg);
         }
+
         Token *tokenptr = new Integer(ans);
         return tokenptr;
     }
-    //abs evaluation function
+    // abs evaluation function
     Token *abseval(Token *arg)
     {
         double darg = stod(arg->token());
@@ -378,20 +428,38 @@ public:
             ans = abs(darg);
         }
 
-        Token *tokenptr = new Integer(ans);
-        return tokenptr;
+        // if (ispolar)
+        // {
+        //     if (darg <= 0)
+        //     {
+        //         Token *tokenptr = new Integer(-10000);
+        //         return tokenptr;
+        //     }
+        //     else
+        //     {
+        //         Token *tokenptr = new Integer(ans);
+        //         return tokenptr;
+        //     }
+        // }
+        // else
+        // {
+            Token *tokenptr = new Integer(ans);
+            return tokenptr;
+        // }
     }
-    //returns int precedence value
+    // returns int precedence value
     int getprecval()
     {
         return _prec;
     }
 
 private:
+    Polar polar;
     int _prec;
+    bool ispolar = false;
 };
 
-//function class
+// function class
 class Function : public Operator
 {
 public:
@@ -402,7 +470,7 @@ public:
 private:
 };
 
-//leftparen class
+// leftparen class
 class LeftParen : public Token
 {
 public:
@@ -412,7 +480,7 @@ public:
 
 private:
 };
-//rightparen class
+// rightparen class
 class RightParen : public Token
 {
 public:
@@ -426,7 +494,7 @@ private:
 class Tokenize : public Token
 {
 public:
-    //tokenize function
+    // tokenize function
     static Queue<Token *> tokenizeinput(const string &input)
     {
         Queue<Token *> tokenqueue;
@@ -443,19 +511,19 @@ public:
             {
                 if (s != "")
                 {
-                    //if number push as integer
+                    // if number push as integer
                     if (isdigit(s[0]))
                     {
                         tokenqueue.push(new Integer(s));
                     }
-                    //if letter push as function (prec functions later will take care of them)
+                    // if letter push as function (prec functions later will take care of them)
                     else if (isalpha(s[0]))
                     {
                         tokenqueue.push(new Function(s));
                     }
                     s = "";
                 }
-                //switch for normal operators + x
+                // switch for normal operators + x
                 switch (c)
                 {
                 case '+':
@@ -486,7 +554,7 @@ public:
             }
         }
 
-        //push the last token if it exists
+        // push the last token if it exists
         if (s != "")
         {
             if (isdigit(s[0]))
@@ -504,7 +572,6 @@ public:
 
 private:
 };
-
 
 /*
 
